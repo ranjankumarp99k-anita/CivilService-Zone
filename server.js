@@ -15,7 +15,7 @@ async function ai(q){
  const key=process.env.GEMINI_API_KEY;
  if(!key) throw new Error('AI key configure नहीं है। Render Environment में GEMINI_API_KEY नाम से API key डालें।');
  const model=process.env.GEMINI_MODEL||'gemini-1.5-flash';
- const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({contents: [{role: 'user', parts: [{text: req.body.question}]}]})}); ,const j = await r.json().catch(()=>({})); if (!r.ok) throw new Error(j.error?.message || ('Gemini request failed ('+r.status+')')); const answer = j.candidates?.[0]?.content?.parts?.[0]?.text; if (!answer) throw new Error('AI से खाली जवाब मिला। कृपया दोबारा कोशिश करें!');
+ const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({contents: [{role: 'user', parts: [{text: req.body.question}]}]})});const j = await r.json().catch(()=>({})); if (!r.ok) throw new Error(j.error?.message || ('Gemini request failed ('+r.status+')')); const answer = j.candidates?.[0]?.content?.parts?.[0]?.text; if (!answer) throw new Error('AI से खाली जवाब मिला। कृपया दोबारा कोशिश करें!');
  return answer;
 }
 const server=http.createServer(async(req,res)=>{try{const u=url.parse(req.url,true),p=u.pathname;if(req.method==='OPTIONS')return json(res,204,{});
