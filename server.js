@@ -12,14 +12,10 @@ function safe(u){const x={...u};delete x.password;return x} function auth(req){c
 function admin(req){const me=auth(req);return me&&me.role==='Admin'?me:null}
 function mime(f){return {'.jpg':'image/jpeg','.jpeg':'image/jpeg','.png':'image/png','.webp':'image/webp'}[path.extname(f).toLowerCase()]||'application/octet-stream'}
 async function ai(q){
- const key=process.env.OPENAI_API_KEY;
- if(!key) throw new Error('AI key configure नहीं है। Render Environment में OPENAI_API_KEY नाम से API key डालें।');
- const model=process.env.OPENAI_MODEL||'gpt-4o-mini';
- const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,messages:[{role:'system',content:'You are CivilService Zone AI assistant. Answer construction, civil engineering, house planning, material, RCC, room and transport questions clearly. Reply in the language used by the user. For structural safety, advise verification by a qualified engineer.'},{role:'user',content:String(q)}],temperature:0.5})});
- const j=await r.json().catch(()=>({}));
- if(!r.ok) throw new Error(j.error?.message||('OpenAI request failed ('+r.status+'). Check the API key and model access in Render.'));
- const answer=j.choices?.[0]?.message?.content;
- if(!answer) throw new Error('AI से खाली जवाब मिला। कृपया दोबारा कोशिश करें।');
+ const key=process.env.GEMINI_API_KEY;
+ if(!key) throw new Error('AI key configure नहीं है। Render Environment में GEMINI_API_KEY नाम से API key डालें।');
+ const model=process.env.GEMINI_MODEL||'gemini-1.5-flash';
+ const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({contents: [{role: 'user', parts: [{text: req.body.question}]}]})}); इसके बाद,const j = await r.json().catch(()=>({})); if (!r.ok) throw new Error(j.error?.message || ('Gemini request failed ('+r.status+')')); const answer = j.candidates?.[0]?.content?.parts?.[0]?.text; if (!answer) throw new Error('AI से खाली जवाब मिला। कृपया दोबारा कोशिश करें!');
  return answer;
 }
 const server=http.createServer(async(req,res)=>{try{const u=url.parse(req.url,true),p=u.pathname;if(req.method==='OPTIONS')return json(res,204,{});
